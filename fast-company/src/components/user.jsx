@@ -23,7 +23,7 @@ const User = ({
       </td>
       <td>{profession.name}</td>
       <td>{completedMeetings}</td>
-      <td>{rate}</td>
+      <td>{rate}/5</td>
       <td>
         <BookMark status={bookmark} onClick={() => onToggleBookMark(_id)} />
       </td>

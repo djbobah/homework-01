@@ -1,10 +1,16 @@
 import React from "react";
+import Pagination from "./pagination";
 import User from "./user";
 
 const Users = ({ users, ...rest }) => {
+  const count = users.length;
+  const pageSize = 4;
+  const handlePageChange = (pageIndex) => {
+    console.log("page", pageIndex);
+  };
   return (
     <>
-      {users.length > 0 && (
+      {count > 0 && (
         <table className="table">
           <thead>
             <tr>
@@ -25,6 +31,11 @@ const Users = ({ users, ...rest }) => {
           </tbody>
         </table>
       )}
+      <Pagination
+        itemsCount={count}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+      />
     </>
   );
 };
