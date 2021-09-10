@@ -12,8 +12,6 @@ const Users = ({ users: allUsers, ...rest }) => {
     const pageSize = 4;
     useEffect(() => {
         api.professions.fetchAll().then((data) => setProfession(data));
-
-        console.log("render");
     }, []);
 
     const handleProfessionSelect = (params) => {
@@ -29,10 +27,13 @@ const Users = ({ users: allUsers, ...rest }) => {
     const users = paginate(allUsers, currentPage, pageSize);
     return (
         <>
-            <GroupList
-                items={professions}
-                onItemSelect={handleProfessionSelect}
-            />
+            {professions && (
+                <GroupList
+                    items={professions}
+                    onItemSelect={handleProfessionSelect}
+                />
+            )}
+
             {count > 0 && (
                 <table className="table">
                     <thead>
