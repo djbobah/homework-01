@@ -1,81 +1,116 @@
-import React, { useState } from "react";
-import api from "../api";
+import React, { useState, useEffect } from "react";
+import Pagination from "./pagination";
+import { paginate } from "../utils/paginate";
 
-const arUsers = () => {
-  return api.users;
-};
+import PropTypes from "prop-types";
+import GroupList from "./groupList";
+import api from "../api";
+import SearchStatus from "./searchStatus";
+import UsersTable from "./usersTable";
+import _ from "lodash";
 
 const Users = () => {
-  const [users, setUsers] = useState(api.users.fetchAll());
+  const [professions, setProfession] = useState();
+  const pageSize = 8;
+
+  const [users, setUsers] = useState();
+  useEffect(() => {
+    api.users.fetchAll().then((data) => setUsers(data));
+  }, []);
   const handleDelete = (userId) => {
     setUsers(users.filter((user) => user._id !== userId));
   };
-  const renderPhrase = (number) => {
-    if (number > 4 && number < 15) return "человек тусанут";
-    const lastOne = Number(number.toString().slice(-1));
-    if ([2, 3, 4].indexOf(lastOne) >= 0) return "человека тусанут";
-    if (lastOne === 1) return "человек тусанет";
-    return "человек тусанут";
+  const handleToggleBookMark = (id) => {
+    setUsers(
+      users.filter((user) => {
+        if (user._id === id) {
+          user.bookmark = !user.bookmark;
+          return user;
+        }
+        return user;
+      })
+    );
   };
 
-  let count = 0;
-  return (
-    <React.Fragment>
-      <h2>
-        <span
-          className={"badge bg-" + (users.length > 0 ? "primary" : "danger")}
-        >
-          {users.length > 0
-            ? `${users.length} ${renderPhrase(users.length)} с тобой сегодня`
-            : "Никто с тобой не тусанет"}
-        </span>
-      </h2>
-      {users.length > 0 && (
-        <table className="table">
-          <thead>
-            <tr>
-              <th scope="col">Имя</th>
-              <th scope="col">Качества</th>
-              <th scope="col">Профессия</th>
-              <th scope="col">Встретился, раз</th>
-              <th scope="col">Оценка</th>
-              <th />
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user._id}>
-                <th scope="row">{(count += 1)}</th>
-                <td>{user.name}</td>
-                <td>
-                  {user.qualities.map((item) => (
-                    <span
-                      className={"badge m-1 bg-" + item.color}
-                      key={item._id}
-                    >
-                      {item.name}{" "}
-                    </span>
-                  ))}
-                </td>
-                <td>{user.profession.name}</td>
-                <td>{user.completedMeetings}</td>
-                <td>{user.rate}</td>
-                <td>
-                  <button
-                    className={"btn btn-danger"}
-                    onClick={() => handleDelete(user._id)}
-                  >
-                    Удалить
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </React.Fragment>
-  );
-};
+  const [selectedProf, setSelectedProf] = useState();
+  const [sortBy, setSortBy] = useState({ path: "name", order: "asc" });
+  useEffect(() => {
+    api.professions.fetchAll().then((data) => setProfession(data));
+  }, []);
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedProf]);
+
+  const handleProfessionSelect = (item) => {
+    setSelectedProf(item);
+  };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const handlePageChange = (pageIndex) => {
+    // console.log("page", pageIndex);
+    setCurrentPage(pageIndex);
+  };
+
+  const handleSort = (item) => {
+    setSortBy(item);
+  };
+
+  if (users) {
+    const filteredUsers = selectedProf
+      ? users.filter(
+          (user) =>
+            JSON.stringify(user.profession) === JSON.stringify(selectedProf)
+        )
+      : users;
+    const count = filteredUsers.length;
+
+    const sortedUsers = _.orderBy(filteredUsers, [sortBy.path], [sortBy.order]);
+
+    const usersCorp = paginate(sortedUsers, currentPage, pageSize);
+    const clearFilter = () => {
+      setSelectedProf();
+    };
+    return (
+      <div className="d-flex">
+        {professions && (
+          <div className="d-flex flex-column flex-shrink-0 p-3">
+            <GroupList
+              selectedItem={selectedProf}
+              items={professions}
+              onItemSelect={handleProfessionSelect}
+            />
+            <button className="btn btn-secondary mt-2" onClick={clearFilter}>
+              Очистить
+            </button>
+          </div>
+        )}
+        <div className="d-flex flex-column">
+          <SearchStatus length={count} />
+          {count > 0 && (
+            <UsersTable
+              users={usersCorp}
+              onSort={handleSort}
+              selectedSort={sortBy}
+              onDelete={handleDelete}
+              onToggleBookMark={handleToggleBookMark}
+            />
+          )}
+          <div className="d-flex justify-content-center">
+            <Pagination
+              itemsCount={count}
+              pageSize={pageSize}
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return "loading...";
+};
+Users.propTypes = {
+  users: PropTypes.array
+};
 export default Users;
