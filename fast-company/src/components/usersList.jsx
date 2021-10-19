@@ -11,6 +11,7 @@ import _ from "lodash";
 
 const UsersList = () => {
   const [professions, setProfession] = useState();
+  const [searchQuery, setSerchQuery] = useState("");
   const pageSize = 8;
 
   const [users, setUsers] = useState();
@@ -40,10 +41,16 @@ const UsersList = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedProf]);
+  }, [selectedProf, searchQuery]);
 
   const handleProfessionSelect = (item) => {
+    setSerchQuery("");
     setSelectedProf(item);
+  };
+
+  const handleSearchQuery = ({ target }) => {
+    if (searchQuery !== "") setSelectedProf(undefined);
+    setSerchQuery(target.value);
   };
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,7 +64,12 @@ const UsersList = () => {
   };
 
   if (users) {
-    const filteredUsers = selectedProf
+    const filteredUsers = searchQuery
+      ? users.filter(
+          (user) =>
+            user.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1
+        )
+      : selectedProf
       ? users.filter(
           (user) =>
             JSON.stringify(user.profession) === JSON.stringify(selectedProf)
@@ -87,6 +99,13 @@ const UsersList = () => {
         )}
         <div className="d-flex flex-column">
           <SearchStatus length={count} />
+          <input
+            type="text"
+            name="searchQuery"
+            placeholder="Search..."
+            onChange={handleSearchQuery}
+            value={searchQuery}
+          />
           {count > 0 && (
             <UsersTable
               users={usersCorp}
