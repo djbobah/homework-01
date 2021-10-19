@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.css";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "./app";
-import NavBar from "./components/navBar";
+import NavBar from "./components/ui/navBar";
 
 ReactDOM.render(
   <React.StrictMode>

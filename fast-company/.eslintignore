@@ -1,2 +1,3 @@
 src/utils/validator.js
-src/components/usersList.jsx
+src/components/page/usersListPage/usersListPage.jsx
+src/layouts/login.jsx
