@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { validator } from "../../utils/validator";
 import TextField from "../common/form/textField";
 import api from "../../api";
+import SelectField from "../common/form/selectField";
 
 const RegisterForm = () => {
   const [data, setData] = useState({ email: "", password: "", profession: "" });
@@ -9,6 +10,7 @@ const RegisterForm = () => {
   useEffect(() => {
     api.professions.fetchAll().then((data) => setProfession(data));
   }, []);
+
   const [errors, setErrors] = useState({});
   const handleChange = ({ target }) => {
     setData((prevState) => ({ ...prevState, [target.name]: target.value }));
@@ -32,6 +34,9 @@ const RegisterForm = () => {
         message: "Пароль должен состоять минимум из 8 символов",
         value: 8
       }
+    },
+    profession: {
+      isRequired: { message: "Обязательно выберите вашу профессию" }
     }
   };
 
@@ -71,27 +76,15 @@ const RegisterForm = () => {
         onChange={handleChange}
         error={errors.password}
       />
-      <div className="mb-4">
-        <label htmlFor="validationCustom04" className="form-label">
-          State
-        </label>
-        <select className="form-select" id="validationCustom04" required>
-          <option selected={data.profession === ""} disabled value="">
-            Choose...
-          </option>
-          {professions &&
-            Object.key(professions).map((professionName) => (
-              <option
-                selected={professions[professionName]._id === data.profession}
-                value={professions[professionName]._id}
-                key={professions[professionName]._id}
-              >
-                {professions[professionName].name}
-              </option>
-            ))}
-        </select>
-        <div className="invalid-feedback">Please select a valid state.</div>
-      </div>
+      <SelectField
+        label="Выбери свою профессию"
+        options={professions}
+        defaultOptions="Choose..."
+        error={errors.profession}
+        value={data.profession}
+        onChange={handleChange}
+      />
+
       <button
         type="submit"
         disabled={!isValid}
