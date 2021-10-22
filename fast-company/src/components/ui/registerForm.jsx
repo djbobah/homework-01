@@ -3,16 +3,29 @@ import { validator } from "../../utils/validator";
 import TextField from "../common/form/textField";
 import api from "../../api";
 import SelectField from "../common/form/selectField";
+import RadioField from "../common/form/radioField";
+import MultiSelectField from "../common/form/multySelectField";
+import CheckBoxField from "../common/form/checkBoxField";
 
 const RegisterForm = () => {
-  const [data, setData] = useState({ email: "", password: "", profession: "" });
+  const [data, setData] = useState({
+    email: "",
+    password: "",
+    profession: "",
+    sex: "male",
+    quolities: [],
+    license: false
+  });
+  const [quolities, setQuolities] = useState({});
   const [professions, setProfession] = useState();
   useEffect(() => {
     api.professions.fetchAll().then((data) => setProfession(data));
+    api.qualities.fetchAll().then((data) => setQuolities(data));
   }, []);
 
   const [errors, setErrors] = useState({});
-  const handleChange = ({ target }) => {
+
+  const handleChange = (target) => {
     setData((prevState) => ({ ...prevState, [target.name]: target.value }));
   };
 
@@ -84,7 +97,30 @@ const RegisterForm = () => {
         value={data.profession}
         onChange={handleChange}
       />
-
+      <RadioField
+        options={[
+          { name: "Male", value: "male" },
+          { name: "Female", value: "female" },
+          { name: "Other", value: "other" }
+        ]}
+        value={data.sex}
+        name="sex"
+        onChange={handleChange}
+        label="Выберите ваш пол"
+      />
+      <MultiSelectField
+        options={quolities}
+        onChange={handleChange}
+        name="quolities"
+        label="Выберите ваши качества"
+      />
+      <CheckBoxField
+        value={data.license}
+        onChange={handleChange}
+        name="license"
+      >
+        Подтвердите лицензионное соглашение
+      </CheckBoxField>
       <button
         type="submit"
         disabled={!isValid}
